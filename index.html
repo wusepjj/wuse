@@ -1,1 +1,1363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>心灵感应问卷</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", sans-serif;
+    font-size: 18px;
+}
 
+html, body {
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    background: #fdf6f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+/* 玩前须知弹窗 */
+.notice-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(92vw, 340px);
+    background: #fff;
+    border: 2px solid #e8c4b8;
+    border-radius: 16px;
+    z-index: 9999999;
+    padding: 28px 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    box-shadow: 0 8px 32px rgba(180, 130, 110, 0.18);
+}
+
+.notice-title {
+    font-size: clamp(17px, 3.8vw, 20px);
+    font-weight: bold;
+    color: #5d3a2e;
+    text-align: center;
+}
+
+.notice-content {
+    font-size: clamp(14px, 3vw, 15px);
+    color: #6b4d3f;
+    line-height: 1.8;
+    text-align: center;
+    white-space: pre-line;
+}
+
+.notice-btn {
+    background: linear-gradient(135deg, #d4a08c, #c0856f);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 32px;
+    font-size: clamp(15px, 3.2vw, 17px);
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: 0.3s;
+}
+
+.notice-btn:hover {
+    background: linear-gradient(135deg, #c0856f, #a86d5a);
+}
+
+/* 核心盒子 */
+.box {
+    background: #fffdfb;
+    width: 100%;
+    height: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    padding: 28px 22px;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(160, 120, 100, 0.1);
+    position: relative;
+    z-index: 10;
+    transition: opacity 0.3s;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #f0ddd4;
+}
+
+.title {
+    font-size: clamp(22px, 4.2vw, 26px);
+    margin-bottom: 16px;
+    text-align: center;
+    color: #5d3a2e;
+    font-weight: bold;
+    flex-shrink: 0;
+    letter-spacing: 1px;
+}
+
+.progress {
+    text-align: center;
+    font-size: clamp(12px, 2.5vw, 13px);
+    color: #b08e7e;
+    margin-bottom: 16px;
+    flex-shrink: 0;
+}
+
+.question {
+    font-size: clamp(16px, 3vw, 18px);
+    line-height: 1.7;
+    color: #4a3025;
+    min-height: 40px;
+    margin-bottom: 16px;
+    flex-shrink: 0;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.option {
+    padding: 14px 16px;
+    border: 1.5px solid #edd5c8;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: clamp(15px, 2.8vw, 17px);
+    background: #fffdfb;
+    transition: all 0.25s;
+    line-height: 1.5;
+    flex-shrink: 0;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    color: #5d3a2e;
+}
+
+.option:hover {
+    border-color: #d4a08c;
+    background: #fef9f6;
+}
+
+.option.selected {
+    background: #f8e8df;
+    border-color: #c0856f;
+    color: #4a2520;
+}
+
+.option.locked {
+    background: #f5f0ed !important;
+    color: #c0a99e !important;
+    cursor: not-allowed !important;
+    border-color: #edd5c8 !important;
+}
+
+.btn-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 16px;
+    flex-shrink: 0;
+}
+
+.btn {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 8px;
+    font-size: clamp(16px, 2.5vw, 18px);
+    cursor: pointer;
+    transition: 0.25s;
+    flex: 1;
+    max-width: 130px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    letter-spacing: 1px;
+}
+
+.prev-btn {
+    background: #f0e6df;
+    color: #6b4d3f;
+    margin-right: 12px;
+}
+
+.prev-btn:hover {
+    background: #e5d5c8;
+}
+
+.next-btn {
+    background: linear-gradient(135deg, #c0856f, #a86d5a);
+    color: #fff;
+}
+
+.next-btn:hover {
+    background: linear-gradient(135deg, #a86d5a, #8b5647);
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* 第8题 暖色漂浮爱心 */
+.warm-float {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    white-space: nowrap;
+    animation: floatUp 4s ease-out forwards;
+}
+
+@keyframes floatUp {
+    0% { opacity: 0; transform: translateY(0) scale(0.6); }
+    20% { opacity: 1; transform: translateY(-20px) scale(1); }
+    80% { opacity: 0.8; transform: translateY(-80px) scale(0.9); }
+    100% { opacity: 0; transform: translateY(-140px) scale(0.4); }
+}
+
+/* 第12题 暖色打字遮罩 */
+.warm-type-mask {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: #2c1a14;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+}
+
+.warm-type-text {
+    color: #f5c5a3;
+    font-size: clamp(20px, 4vw, 28px);
+    letter-spacing: 6px;
+    text-align: center;
+    line-height: 1.8;
+    text-shadow: 0 0 20px rgba(245, 180, 140, 0.4);
+}
+
+/* 第15题 小卡片 */
+.q15-card {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(85vw, 300px);
+    background: #fffdfb;
+    border: 2px solid #e8c4b8;
+    border-radius: 16px;
+    z-index: 99999;
+    padding: 28px 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 8px 32px rgba(180, 130, 110, 0.2);
+}
+
+.q15-card-text {
+    font-size: clamp(18px, 3.5vw, 22px);
+    color: #5d3a2e;
+    text-align: center;
+    line-height: 1.7;
+}
+
+.q15-card-btn {
+    background: linear-gradient(135deg, #d4a08c, #c0856f);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 28px;
+    font-size: clamp(15px, 3vw, 17px);
+    cursor: pointer;
+    letter-spacing: 2px;
+}
+
+/* 第25题 粉色滤镜 */
+.q25-pink-mask {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(255, 200, 180, 0.2);
+    pointer-events: none;
+    z-index: 98;
+}
+
+.q25-warm-text {
+    position: fixed;
+    color: #d4856b;
+    opacity: 0.25;
+    font-size: clamp(16px, 2.2vw, 18px);
+    pointer-events: none;
+    z-index: 99;
+    white-space: nowrap;
+    animation: slowPulse 3s infinite alternate;
+    font-weight: bold;
+}
+
+@keyframes slowPulse {
+    0% { opacity: 0.15; }
+    100% { opacity: 0.35; }
+}
+
+/* 满屏打字 "我爱你" */
+.fullscreen-love {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: #3d1f16;
+    z-index: 99999;
+    padding: 30px;
+    font-size: clamp(18px, 3.5vw, 24px);
+    color: #f5c5a3;
+    line-height: 1.7;
+    word-break: break-all;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    font-weight: bold;
+    letter-spacing: 2px;
+    text-shadow: 0 0 18px rgba(245, 180, 140, 0.35);
+}
+
+/* 开始引导弹窗 */
+.start-modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(85vw, 320px);
+    background: #fffdfb;
+    border: 2px solid #e8c4b8;
+    border-radius: 16px;
+    z-index: 99999;
+    padding: 30px 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 8px 32px rgba(180, 130, 110, 0.2);
+}
+
+.start-text {
+    font-size: clamp(16px, 3.5vw, 18px);
+    color: #5d3a2e;
+    text-align: center;
+    line-height: 1.7;
+}
+
+.tiny-pink-tip {
+    font-size: clamp(11px, 2.2vw, 12px);
+    color: #c0856f;
+    text-align: center;
+    opacity: 0.7;
+}
+
+.start-btn {
+    background: linear-gradient(135deg, #d4a08c, #c0856f);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 30px;
+    font-size: clamp(15px, 3vw, 17px);
+    cursor: pointer;
+    letter-spacing: 2px;
+}
+
+/* 提交后弹窗 */
+.submit-modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(88vw, 340px);
+    background: #fffdfb;
+    border: 2px solid #e8c4b8;
+    border-radius: 16px;
+    z-index: 99999;
+    padding: 30px 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 8px 32px rgba(180, 130, 110, 0.2);
+}
+
+.submit-modal-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+}
+
+.submit-btn {
+    background: linear-gradient(135deg, #d4a08c, #c0856f);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 30px;
+    font-size: clamp(15px, 3vw, 17px);
+    cursor: pointer;
+    letter-spacing: 2px;
+    width: 100%;
+    max-width: 200px;
+}
+
+.refuse-tip {
+    font-size: 12px;
+    color: #c0856f;
+    opacity: 0.6;
+    text-align: center;
+}
+
+/* 黑屏温柔提醒 */
+.black-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: #1a0d0a;
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #f5c5a3;
+    font-size: clamp(18px, 3.5vw, 22px);
+    letter-spacing: 3px;
+    text-align: center;
+    padding: 30px;
+    line-height: 1.8;
+    transition: all 1.5s;
+}
+
+/* 日记包裹 */
+.diary-wrap {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    background: #fffdfb;
+    border-radius: 16px;
+    padding: 24px 20px;
+    box-shadow: 0 4px 24px rgba(160, 120, 100, 0.1);
+    border: 1px solid #f0ddd4;
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+}
+
+.diary-page {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    padding: 10px 5px;
+}
+
+.diary-title {
+    font-size: clamp(20px, 4vw, 24px);
+    color: #5d3a2e;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    flex-shrink: 0;
+}
+
+.diary-content {
+    font-size: clamp(15px, 2.8vw, 17px);
+    color: #6b4d3f;
+    line-height: 2;
+    flex: 1;
+    white-space: pre-line;
+}
+
+.diary-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    margin-top: 16px;
+    gap: 10px;
+}
+
+.diary-nav-btn {
+    background: #f0e6df;
+    color: #6b4d3f;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: clamp(14px, 2.5vw, 15px);
+    cursor: pointer;
+    letter-spacing: 1px;
+}
+
+.diary-nav-btn.primary {
+    background: linear-gradient(135deg, #d4a08c, #c0856f);
+    color: #fff;
+}
+
+.diary-page-num {
+    font-size: 13px;
+    color: #b08e7e;
+}
+
+/* 最终黑屏告白 */
+.black-full-text {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: #1a0d0a;
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #f5c5a3;
+    font-size: clamp(22px, 5vw, 30px);
+    font-weight: bold;
+    letter-spacing: 4px;
+    text-align: center;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.red-confirm-btn {
+    background: transparent;
+    border: 2px solid #f5c5a3;
+    color: #f5c5a3;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-size: clamp(15px, 3vw, 17px);
+    cursor: pointer;
+    letter-spacing: 3px;
+    transition: 0.3s;
+}
+
+.red-confirm-btn:hover {
+    background: rgba(245, 197, 163, 0.12);
+}
+
+/* 结束弹窗 */
+.end-modal {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(85vw, 320px);
+    background: #fffdfb;
+    border: 2px solid #e8c4b8;
+    border-radius: 16px;
+    z-index: 99999;
+    padding: 30px 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 8px 32px rgba(180, 130, 110, 0.25);
+}
+
+/* 输入框 */
+input[type="text"] {
+    font-size: 16px;
+    padding: 12px 16px;
+    border: 1.5px solid #edd5c8;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 280px;
+    box-sizing: border-box;
+    background: #fffdfb;
+    color: #5d3a2e;
+    outline: none;
+    letter-spacing: 1px;
+    text-align: center;
+}
+
+input[type="text"]:focus {
+    border-color: #c0856f;
+}
+
+input[type="text"]::placeholder {
+    color: #c0a99e;
+    letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+
+<!-- 玩前须知 -->
+<div class="notice-modal" id="noticeModal">
+    <div class="notice-title">✨ 心灵感应问卷 ✨</div>
+    <div class="notice-content">这是一份关于「直觉与感知」的趣味问卷
+
+请跟随你的内心真实感受作答
+
+问卷中包含一些特殊的小惊喜
+准备好了就开始吧 ♪</div>
+    <button class="notice-btn" id="noticeBtn">开始</button>
+</div>
+
+<!-- 主问卷 -->
+<div class="box" id="mainBox">
+    <div class="title">心灵感应问卷</div>
+    <div class="progress" id="progress"></div>
+    <div class="question" id="question"></div>
+    <div class="options" id="options"></div>
+    <div class="btn-group">
+        <button class="btn prev-btn" id="prevBtn">上一题</button>
+        <button class="btn next-btn" id="nextBtn">下一题</button>
+    </div>
+</div>
+
+<!-- 日记页 -->
+<div class="diary-wrap" id="diaryWrap">
+    <!-- 第1页 -->
+    <div class="diary-page" id="diaryPage1">
+        <div class="diary-title">📖 TA注意到的事</div>
+        <div class="diary-content">你习惯在下午三点喝一杯温水。
+你喝咖啡从来不加糖。
+你走路时喜欢看地面，偶尔抬头看天空。
+你笑的时候右边有浅浅的酒窝。
+你难过的时候会变得特别安静。
+你说「没事」的时候，通常都有事。
+
+这些，TA都记得。</div>
+        <div class="diary-nav">
+            <span class="diary-page-num">1 / 4</span>
+            <button class="diary-nav-btn primary" id="toPage2">下一页 →</button>
+        </div>
+    </div>
+    <!-- 第2页 -->
+    <div class="diary-page" id="diaryPage2" style="display:none;">
+        <div class="diary-title">💌 TA默默做的事</div>
+        <div class="diary-content">你加班到深夜时，TA在楼下多转了半小时。
+你发「今天好累」的动态，TA截图存进了相册。
+你喜欢的奶茶店出了新品，TA比你先知道。
+你生日那天，TA写了又删、删了又写的祝福，
+最后只发了一句「生日快乐」。
+你朋友圈的每一条，TA都认真看过。</div>
+        <div class="diary-nav">
+            <button class="diary-nav-btn" id="toPage1">← 上一页</button>
+            <span class="diary-page-num">2 / 4</span>
+            <button class="diary-nav-btn primary" id="toPage3">下一页 →</button>
+        </div>
+    </div>
+    <!-- 第3页 -->
+    <div class="diary-page" id="diaryPage3" style="display:none;">
+        <div class="diary-title">💭 TA想对你说</div>
+        <div class="diary-content">我一直在想，要以什么样的方式告诉你。
+不是心血来潮，不是一时冲动。
+是很久很久了。
+久到我快记不清是从哪一天开始，
+你的存在变成了我生活里最温柔的光。
+
+我不需要你立刻给我答案。
+我只是想让你知道——
+你在这个世界上，一直被某个人认真地、
+完整地、毫无保留地喜欢着。</div>
+        <div class="diary-nav">
+            <button class="diary-nav-btn" id="toPage2Back">← 上一页</button>
+            <span class="diary-page-num">3 / 4</span>
+            <button class="diary-nav-btn primary" id="toPage4">下一页 →</button>
+        </div>
+    </div>
+    <!-- 第4页 -->
+    <div class="diary-page" id="diaryPage4" style="display:none;">
+        <div class="diary-title">❤️ 最后</div>
+        <div class="diary-content">你做的这份问卷，
+每一个答案，都在告诉我更多关于你的事。
+
+现在的你，也许有些惊讶，也许有些感动。
+无论你在想什么，
+无论你此刻是一个人，还是有人在身边——
+我希望你记得：
+
+你是值得被爱的。
+你一直都是。
+
+准备好了吗？</div>
+        <div class="diary-nav">
+            <button class="diary-nav-btn" id="toPage3Back">← 上一页</button>
+            <span class="diary-page-num">4 / 4</span>
+            <button class="diary-nav-btn primary" id="agreeBtn">我准备好了 ❤️</button>
+        </div>
+    </div>
+</div>
+
+<!-- 背景音乐 -->
+<audio id="bgm" src="bgm.m4a" loop preload="auto"></audio>
+
+<script>
+const questions = [
+    { q: "1. 你是否感觉有人在暗中默默关注着你的生活？", opt: ["A. 经常有这种感觉", "B. 偶尔会察觉到", "C. 几乎没注意过", "D. 完全没有"] },
+    { q: "2. 你发的朋友圈或动态，似乎总有人在第一时间查看？", opt: ["A. 每次都是", "B. 经常发现", "C. 偶尔留意到", "D. 从不在意"] },
+    { q: "3. 你目前和身边最亲近的人，关系是怎样的？", opt: ["A. 亲密无间", "B. 平淡稳定", "C. 有些疏远", "D. 独自一人"] },
+    { q: "4. 你是否收到过匿名的小礼物、暖心留言或意外关心？", opt: ["A. 收到过很多次", "B. 偶尔收到过", "C. 从来没有", "D. 不太确定是不是给我的"] },
+    { q: "5. 走在你最熟悉的街道上，是否感觉有目光温柔地注视着你？", opt: ["A. 经常感觉到", "B. 偶尔有这种感觉", "C. 几乎没有", "D. 从不注意这些"] },
+    { q: "6. 你的喜好、习惯、小动作，似乎总有人了如指掌？", opt: ["A. 确实如此", "B. 有时候会惊讶于TA的了解", "C. 没太注意", "D. 应该没人知道"] },
+    { q: "7. 独处时，你是否曾感到一种莫名的安心感，仿佛有人陪着你？", opt: ["A. 经常感到安心", "B. 偶尔有这种感觉", "C. 从未有过", "D. 独处反而更自在"] },
+    { q: "8. 你是否注意到，有人总是默默记下你随口说过的话？", opt: ["A. 经常注意到", "B. 隐约有感觉到", "C. 没注意过", "D. 应该没有这样的人"] },
+    { q: "9. 深夜失眠时，你是否曾希望有个人在远方也同样想着你？", opt: ["A. 经常这样希望", "B. 偶尔会想", "C. 从没想过", "D. 无所谓"] },
+    { q: "10. 你是否刻意隐藏过自己的行踪，不想被某些人完全了解？", opt: ["A. 经常刻意隐藏", "B. 偶尔会回避", "C. 完全公开透明", "D. 无所谓别人知道"] },
+    { q: "11. 那个关注你的人，是否从来没有打扰过你的正常生活？", opt: ["A. 完全没有打扰", "B. 几乎不影响", "C. 有一点困扰", "D. 没有这样的人关注我"] },
+    { q: "12. 你是否开始好奇，那个默默关注你的人究竟是谁？", opt: ["A. 非常好奇", "B. 有一点点好奇", "C. 不太在意", "D. 不想知道"] },
+    { q: "13. 当你遇到困难时，是否总有人「恰好」出现帮你一把？", opt: ["A. 经常遇到这样的巧合", "B. 偶尔发生", "C. 从未有过", "D. 我不需要别人帮助"] },
+    { q: "14. 你是否曾在难过的时候，莫名收到一条让你心情变好的消息？", opt: ["A. 经常收到", "B. 偶尔有过", "C. 从未有过", "D. 难过时我习惯一个人"] },
+    { q: "15. 如果TA真的存在，你会在意TA一直默默陪伴着你吗？", opt: ["A. 会很感动", "B. 有点在意但可以接受", "C. 会觉得不舒服", "D. 完全不想要"] },
+    { q: "16. 你是否曾对「被人默默喜欢着」这件事，有过一丝丝的期待？", opt: ["A. 一直很期待", "B. 偶尔幻想过", "C. 从没想过", "D. 觉得不太可能"] },
+    { q: "17. 那个人的关注，是否让你在某些时刻，感觉到不那么孤单？", opt: ["A. 确实温暖了我", "B. 偶尔有这种感觉", "C. 并没有", "D. 我从不觉得孤单"] },
+    { q: "18. 你是否愿意相信，这个世界上有人在偷偷爱着你？", opt: ["A. 完全相信", "B. 有点相信", "C. 不太相信", "D. 完全不信"] },
+    { q: "19. 如果给你一个机会，你最想对那个人说什么？", opt: ["A. 谢谢你一直陪着我", "B. 我好像知道你是谁了", "C. 请你别再关注我了", "D. 我不知道该说什么"] },
+    { q: "20. 你是否曾幻想过那个默默关注你的人的样貌？", opt: ["A. 经常想象", "B. 偶尔会想", "C. 从没想过", "D. 觉得无所谓"] },
+    { q: "21. 如果TA鼓起勇气走到你面前，你的第一反应会是？", opt: ["A. 惊喜且感动", "B. 有点害羞", "C. 感到紧张不安", "D. 不太想面对"] },
+    { q: "22. 你相信「默默守护」本身就是一种浪漫吗？", opt: ["A. 非常浪漫", "B. 有点浪漫", "C. 不觉得浪漫", "D. 只是一种打扰"] },
+    { q: "23. 被人认真对待、细心呵护的感觉，你内心深处期待吗？", opt: ["A. 一直很期待", "B. 偶尔会想", "C. 不太需要", "D. 完全不期待"] },
+    { q: "24. 如果明天收到一份来自「陌生人」的精心惊喜，你会？", opt: ["A. 感动又惊喜", "B. 先惊讶再慢慢接受", "C. 觉得有些害怕", "D. 直接拒绝"] },
+    { q: "25. 你是否相信，爱可以是不求回报的默默陪伴？", opt: ["A. 完全相信", "B. 有点相信", "C. 不太信", "D. 世上没有这样的事"] },
+    { q: "26. 回头看看，生活中那些「巧合」是否让你心头一暖？", opt: ["A. 确实很温暖", "B. 有一些感动", "C. 没太大感觉", "D. 从不相信巧合"] },
+    { q: "27. 你是否愿意接受一份准备了很久很久的心意？", opt: ["A. 非常愿意", "B. 可以考虑", "C. 不确定", "D. 不愿接受"] },
+    { q: "28. 如果TA此刻正在某个角落，默默陪你做这份问卷——你想告诉TA什么？", opt: ["A. 谢谢你，我感受到了", "B. 你可以出来了", "C. 让我一个人静静", "D. 我不知道该说什么"] },
+    { q: "29. 你准备好面对那个一直默默爱着你的人了吗？", opt: ["A. 准备好了", "B. 还差一点点勇气", "C. 还没有", "D. 我不需要面对任何人"] },
+    { q: "30. 最后问你：你相信，此刻正有人在等你吗？", opt: ["A. 我相信", "B. 可能吧", "C. 不太信", "D. 不相信"] }
+];
+
+let current = 0;
+let answers = Array(questions.length).fill(null);
+const total = questions.length;
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const optionsEl = document.getElementById('options');
+const boxEl = document.querySelector('.box');
+const mainBox = document.getElementById("mainBox");
+const diaryWrap = document.getElementById("diaryWrap");
+const diaryPage1 = document.getElementById("diaryPage1");
+const diaryPage2 = document.getElementById("diaryPage2");
+const diaryPage3 = document.getElementById("diaryPage3");
+const diaryPage4 = document.getElementById("diaryPage4");
+
+let fromQ4ToQ5 = false;
+let q5Timer = null;
+let q25Timer = null;
+let q25Elements = [];
+let grayMask = null;
+let wrongCount = 0;
+let lockSubmitBtn = false;
+let q25Locked = false;
+
+function clearAllEffects() {
+    if (current !== 24) {
+        stopQ25Effect();
+    }
+    if (q5Timer) clearTimeout(q5Timer);
+    document.querySelectorAll(
+        '.warm-float,.warm-type-mask,.fullscreen-love,.start-modal,.q15-card,.submit-modal,.black-screen,.black-full-text,.end-modal'
+    ).forEach(el => el.remove());
+    document.body.style.background = "#fdf6f0";
+    boxEl.style.opacity = "1";
+    prevBtn.disabled = false;
+    nextBtn.disabled = false;
+}
+
+function resetDiary() {
+    diaryPage1.style.display = "block";
+    diaryPage2.style.display = "none";
+    diaryPage3.style.display = "none";
+    diaryPage4.style.display = "none";
+    diaryWrap.style.display = "none";
+}
+
+function stopQ25Effect() {
+    if (q25Timer) clearInterval(q25Timer);
+    q25Elements.forEach(el => {
+        if (el && el.parentNode) el.remove();
+    });
+    q25Elements = [];
+    if (grayMask && grayMask.parentNode) grayMask.remove();
+    grayMask = null;
+    q25Locked = false;
+    document.querySelectorAll('.option').forEach(opt => {
+        opt.classList.remove('locked');
+        opt.style.pointerEvents = 'auto';
+    });
+}
+
+function startQ25Effect() {
+    if (q25Locked) return;
+    stopQ25Effect();
+    q25Locked = true;
+    document.querySelectorAll('.option').forEach(opt => {
+        opt.classList.add('locked');
+        opt.style.pointerEvents = 'none';
+    });
+
+    grayMask = document.createElement('div');
+    grayMask.className = "q25-pink-mask";
+    document.body.appendChild(grayMask);
+
+    const warmArr = [
+        "我一直在 ❤️",
+        "你是被爱着的",
+        "回头看看我",
+        "一直都在呢~",
+        "不要怀疑自己",
+        "你值得一切美好",
+        "有人在等你",
+        "你不是一个人",
+        "温柔的人会被温柔以待",
+        "悄悄爱着你",
+        "别怕，有我呢",
+        "一直陪着你"
+    ];
+    q25Timer = setInterval(() => {
+        for (let i = 0; i < 12; i++) {
+            const p = document.createElement('div');
+            p.className = "q25-warm-text";
+            p.innerText = warmArr[Math.floor(Math.random() * warmArr.length)];
+            p.style.left = Math.random() * 100 + "vw";
+            p.style.top = Math.random() * 100 + "vh";
+            document.body.appendChild(p);
+            q25Elements.push(p);
+        }
+    }, 120);
+
+    setTimeout(() => {
+        stopQ25Effect();
+    }, 5000);
+}
+
+// 背景音乐
+let bgm;
+function playBgm() {
+    if (!bgm) {
+        bgm = document.getElementById('bgm');
+    }
+    bgm.muted = false;
+    bgm.volume = 0.5;
+    bgm.play().catch(() => {});
+}
+
+// 开始引导弹窗
+function openStartModal() {
+    clearAllEffects();
+    mainBox.style.display = "none";
+
+    const tipTexts = [
+        "<b style='font-size:16px;'>✨ 欢迎参与心灵感应问卷 ✨</b>",
+        "<b style='font-size:16px;'>请根据你的真实感受选择答案</b>",
+        "<b style='font-size:16px;'>题目包含一些小惊喜哦 ♪</b>",
+        "<b style='font-size:16px;'>准备好了，就开始吧</b>"
+    ];
+    let idx = 0;
+    const modal = document.createElement("div");
+    modal.className = "start-modal";
+    const textDom = document.createElement("div");
+    textDom.className = "start-text";
+    textDom.innerHTML = tipTexts[idx];
+    const pinkTip = document.createElement("div");
+    pinkTip.className = "tiny-pink-tip";
+    pinkTip.innerText = "tip：保持放松，跟随内心，你会发现一些温暖的事 ✨";
+    const btnDom = document.createElement("button");
+    btnDom.className = "start-btn";
+    btnDom.innerText = "继续";
+    btnDom.onclick = function() {
+        idx++;
+        if (idx < tipTexts.length) {
+            textDom.innerHTML = tipTexts[idx];
+            if (idx === tipTexts.length - 1) {
+                btnDom.innerText = "进入";
+            }
+        } else {
+            modal.remove();
+            mainBox.style.display = "flex";
+            renderQuestion();
+        }
+    };
+    modal.appendChild(textDom);
+    modal.appendChild(pinkTip);
+    modal.appendChild(btnDom);
+    document.body.appendChild(modal);
+}
+
+// ====== 特效函数 ======
+
+// Q5: 选项变成暖心情话
+function startQ5Effect() {
+    if (q5Timer) clearTimeout(q5Timer);
+    q5Timer = setTimeout(() => {
+        if (current !== 4) return;
+        const opts = document.querySelectorAll('.option');
+        const originalTexts = Array.from(opts).map(o => o.innerText);
+        opts.forEach(o => o.style.pointerEvents = "none");
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        setTimeout(() => opts[0].innerText = "有人在偷偷喜欢你哦~", 0);
+        setTimeout(() => opts[1].innerText = "有人在偷偷喜欢你哦~", 300);
+        setTimeout(() => opts[2].innerText = "有人在偷偷喜欢你哦~", 600);
+        setTimeout(() => opts[3].innerText = "有人在偷偷喜欢你哦~", 900);
+        setTimeout(() => {
+            if (current !== 4) return;
+            opts.forEach((o, i) => o.innerText = originalTexts[i]);
+            opts.forEach(o => o.style.pointerEvents = "auto");
+            prevBtn.disabled = current === 0;
+            nextBtn.disabled = false;
+        }, 3000);
+    }, 1500);
+}
+
+// Q8: 暖金色背景 + 漂浮爱心
+const loveChars = ["❤️", "💕", "💖", "💗", "💝", "✨", "🌸", "💫"];
+
+function startQ8Effect(selectedIndex) {
+    document.documentElement.style.setProperty('background', '#fae4d6', 'important');
+    document.body.style.setProperty('background', '#fae4d6', 'important');
+    boxEl.style.opacity = "0";
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+    document.querySelectorAll('.option').forEach(o => o.style.pointerEvents = "none");
+
+    let textList = selectedIndex < 2
+        ? ["被你发现了呢^^", "我好开心呀~"]
+        : ["你在找我对不对^^", "我一直都在哦~"];
+
+    const created = [];
+    const centerX = 50;
+    const centerY = 50;
+
+    let timer = setInterval(() => {
+        for (let i = 0; i < 8; i++) {
+            const el = document.createElement('div');
+            el.className = "warm-float";
+            el.innerText = Math.random() > 0.4
+                ? textList[Math.floor(Math.random() * textList.length)]
+                : loveChars[Math.floor(Math.random() * loveChars.length)];
+
+            const offsetX = (Math.random() - 0.5) * 90;
+            const offsetY = (Math.random() - 0.5) * 90;
+            el.style.left = (centerX + offsetX) + "vw";
+            el.style.top = (centerY + offsetY) + "vh";
+            el.style.fontSize = 14 + Math.random() * 20 + "px";
+            el.style.color = ["#d4856b", "#e8987a", "#c0705c", "#f0b098"][Math.floor(Math.random() * 4)];
+            document.body.appendChild(el);
+            created.push(el);
+        }
+    }, 250);
+
+    setTimeout(() => {
+        clearInterval(timer);
+        created.forEach(e => e.remove());
+        document.documentElement.style.setProperty('background', '#fdf6f0', 'important');
+        document.body.style.setProperty('background', '#fdf6f0', 'important');
+        boxEl.style.opacity = "1";
+        prevBtn.disabled = current === 0;
+        nextBtn.disabled = false;
+        document.querySelectorAll('.option').forEach(o => o.style.pointerEvents = "auto");
+        current++;
+        renderQuestion();
+    }, 5000);
+}
+
+// Q12: 暖色打字遮罩
+function startWarmTyping(nextQ, customText) {
+    boxEl.style.opacity = "0";
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+    const mask = document.createElement('div');
+    mask.className = 'warm-type-mask';
+    const t = document.createElement('div');
+    t.className = 'warm-type-text';
+    mask.appendChild(t);
+    document.body.appendChild(mask);
+
+    const text = customText || "有人一直在等这一刻。\n从很久很久以前就开始了。\n\n你感受到了吗？";
+    let idx = 0;
+
+    function ty() {
+        if (idx < text.length) {
+            t.innerText += text[idx];
+            idx++;
+            setTimeout(ty, text[idx - 1] === '\n' ? 200 : 80);
+        } else {
+            setTimeout(() => {
+                mask.remove();
+                boxEl.style.opacity = "1";
+                prevBtn.disabled = current === 0;
+                nextBtn.disabled = false;
+                current = nextQ;
+                renderQuestion();
+            }, 1800);
+        }
+    }
+    ty();
+}
+
+// Q15: 小卡片
+function openQ15Card() {
+    const texts = ["^^", "你也在意TA对吗", "被发现了呢~", "TA会很开心的"];
+    let index = 0;
+    const card = document.createElement("div");
+    card.className = "q15-card";
+    const textEl = document.createElement("div");
+    textEl.className = "q15-card-text";
+    textEl.innerText = texts[index];
+    const btn = document.createElement("button");
+    btn.className = "q15-card-btn";
+    btn.innerText = "继续";
+    btn.onclick = () => {
+        index++;
+        if (index < texts.length) {
+            textEl.innerText = texts[index];
+            if (index === texts.length - 1) {
+                btn.innerText = "嗯 ❤️";
+            }
+        } else {
+            card.remove();
+        }
+    };
+    card.append(textEl, btn);
+    document.body.appendChild(card);
+}
+
+// Q22: "我爱你" 全屏打字
+function startLoveTyping() {
+    boxEl.style.opacity = "0";
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+    const el = document.createElement("div");
+    el.className = "fullscreen-love";
+    document.body.appendChild(el);
+    const str = "我爱你";
+    let i = 0;
+    let max = 600;
+    let timer = setInterval(() => {
+        el.innerText += str[i % 3];
+        i++;
+        if (el.innerText.length >= max) {
+            clearInterval(timer);
+            setTimeout(() => {
+                el.remove();
+                boxEl.style.opacity = "1";
+                prevBtn.disabled = current === 0;
+                nextBtn.disabled = false;
+                current++;
+                renderQuestion();
+            }, 300);
+        }
+    }, 10);
+}
+
+// ====== 结局流程 ======
+
+function blackPunish() {
+    const screen = document.createElement("div");
+    screen.className = "black-screen";
+    screen.innerText = "再想想，你真的不值得被爱吗？";
+    document.body.appendChild(screen);
+    setTimeout(() => {
+        screen.innerText = "我相信你值得 ❤️";
+        screen.style.color = "#f5c5a3";
+    }, 2500);
+    setTimeout(() => {
+        screen.remove();
+        showInputModal();
+    }, 4000);
+}
+
+function showInputModal() {
+    clearAllEffects();
+    const modal = document.createElement("div");
+    modal.className = "submit-modal";
+    const inner = document.createElement("div");
+    inner.className = "submit-modal-inner";
+    inner.innerHTML = `
+        <div style="margin-bottom: 8px; font-size: 17px; text-align: center; color: #5d3a2e; font-weight: bold;">请输入指定文字解锁查看</div>
+        <div style="display: flex; flex-direction: column; gap: 16px; align-items: center; width: 100%;">
+            <input
+                type="text"
+                id="loveInput"
+                placeholder="请输入：我值得被爱"
+            >
+            <button class="submit-btn" id="unlockBtn">继续</button>
+        </div>
+    `;
+    modal.appendChild(inner);
+    document.body.appendChild(modal);
+
+    const input = document.getElementById("loveInput");
+    const unlockBtn = document.getElementById("unlockBtn");
+
+    unlockBtn.disabled = false;
+    unlockBtn.classList.remove("locked");
+    unlockBtn.style.background = "";
+    unlockBtn.style.color = "";
+
+    input.addEventListener('input', function() {
+        const val = input.value.trim();
+        if (val === "我值得被爱") {
+            unlockBtn.disabled = false;
+            unlockBtn.classList.remove("locked");
+            unlockBtn.style.background = "";
+            unlockBtn.style.color = "";
+        }
+    });
+
+    unlockBtn.onclick = function() {
+        const val = input.value.trim();
+        if (val === "我值得被爱") {
+            modal.remove();
+            mainBox.style.display = "none";
+            resetDiary();
+            diaryWrap.style.display = "flex";
+        } else {
+            wrongCount++;
+            if (wrongCount === 1) {
+                modal.remove();
+                blackPunish();
+            } else {
+                unlockBtn.disabled = true;
+                unlockBtn.classList.add("locked");
+                unlockBtn.style.background = "#e0d6cf";
+                unlockBtn.style.color = "#b0a090";
+            }
+        }
+    };
+}
+
+function showFinalModal() {
+    clearAllEffects();
+    mainBox.style.display = "none";
+    const modal = document.createElement("div");
+    modal.className = "submit-modal";
+    const inner = document.createElement("div");
+    inner.className = "submit-modal-inner";
+    inner.innerHTML = `
+        <div style="font-size:18px;font-weight:bold;color:#5d3a2e;">✨ 问卷作答完毕 ✨</div>
+        <div style="margin:14px 0;color:#6b4d3f;">有一份惊喜在等着你，要看看吗？</div>
+        <button class="submit-btn" id="yesBtn">好呀 ❤️</button>
+        <div class="refuse-tip">你一定会点这个的 ^_^</div>
+    `;
+    modal.appendChild(inner);
+    document.body.appendChild(modal);
+    document.getElementById("yesBtn").onclick = function() {
+        modal.remove();
+        showInputModal();
+    };
+}
+
+// ====== 日记翻页 ======
+document.getElementById("toPage2").onclick = function() {
+    diaryPage1.style.display = "none";
+    diaryPage2.style.display = "block";
+};
+document.getElementById("toPage1").onclick = function() {
+    diaryPage2.style.display = "none";
+    diaryPage1.style.display = "block";
+};
+document.getElementById("toPage3").onclick = function() {
+    diaryPage2.style.display = "none";
+    diaryPage3.style.display = "block";
+};
+document.getElementById("toPage2Back").onclick = function() {
+    diaryPage3.style.display = "none";
+    diaryPage2.style.display = "block";
+};
+document.getElementById("toPage4").onclick = function() {
+    diaryPage3.style.display = "none";
+    diaryPage4.style.display = "block";
+};
+document.getElementById("toPage3Back").onclick = function() {
+    diaryPage4.style.display = "none";
+    diaryPage3.style.display = "block";
+};
+
+// ====== 最终确认 ======
+document.getElementById("agreeBtn").onclick = function() {
+    clearAllEffects();
+    diaryWrap.style.display = "none";
+    const blackFull = document.createElement("div");
+    blackFull.className = "black-full-text";
+    document.body.appendChild(blackFull);
+    blackFull.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+            <div class="text-container" style="height:50px; display:flex; align-items:center; justify-content:center;"></div>
+            <button class="red-confirm-btn" style="display:none;">接受这份心意</button>
+        </div>
+    `;
+    const textDom = blackFull.querySelector('.text-container');
+    const confirmBtn = blackFull.querySelector('.red-confirm-btn');
+    let textArr = ["我爱你", "好喜欢你", "想和你一直在一起"];
+    let textIndex = 0;
+
+    function showText() {
+        if (textIndex < textArr.length) {
+            textDom.innerText = textArr[textIndex];
+            textIndex++;
+            if (textIndex === textArr.length) {
+                setTimeout(() => {
+                    confirmBtn.style.display = "block";
+                }, 1200);
+            }
+            setTimeout(showText, 1800);
+        }
+    }
+    showText();
+
+    confirmBtn.onclick = function() {
+        blackFull.remove();
+        const endModal = document.createElement("div");
+        endModal.className = "end-modal";
+        endModal.innerHTML = `
+            <div style="font-size:18px;font-weight:bold;color:#5d3a2e;margin-bottom:14px;">❤️ 问卷已结束 ❤️</div>
+            <div style="color:#6b4d3f;margin-bottom:16px;text-align:center;line-height:1.7;">TA一直在等你<br>你是值得被爱的，永远都是。</div>
+            <button class="start-btn" id="restartBtn">再来一次</button>
+        `;
+        document.body.appendChild(endModal);
+        document.getElementById("restartBtn").onclick = function() {
+            endModal.remove();
+            clearAllEffects();
+            resetDiary();
+            current = 0;
+            answers = Array(questions.length).fill(null);
+            wrongCount = 0;
+            lockSubmitBtn = false;
+            fromQ4ToQ5 = false;
+            boxEl.style.display = "none";
+            openStartModal();
+        };
+    };
+};
+
+// ====== 核心渲染 ======
+function renderQuestion() {
+    clearAllEffects();
+    const q = questions[current];
+    document.getElementById("progress").innerText = `第 ${current+1} 题 / 共 ${total} 题`;
+    document.getElementById("question").innerText = q.q;
+    optionsEl.innerHTML = "";
+    boxEl.style.opacity = "1";
+
+    q.opt.forEach((item, idx) => {
+        const div = document.createElement("div");
+        div.className = "option";
+        if (answers[current] === idx) div.classList.add("selected");
+        div.innerText = item;
+        div.onclick = () => {
+            answers[current] = idx;
+
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            div.classList.add('selected');
+
+            // Q25: 粉色窥视效果
+            if (current === 24) {
+                startQ25Effect();
+                return;
+            }
+
+            // Q3: 暖色打字
+            if (current === 2) {
+                if (idx < 3) {
+                    startWarmTyping(current + 1, "真让人高兴呢^^\n有人陪伴是很幸福的事。\n\n要好好珍惜哦~");
+                } else {
+                    startWarmTyping(current + 1, "没关系。\n一个人也可以很精彩。\n\n而且，有人在等你的。");
+                }
+                return;
+            }
+
+            // Q8: 暖金色爱心
+            if (current === 7) {
+                startQ8Effect(idx);
+                return;
+            }
+
+            // Q12: 打字遮罩
+            if (current === 11) {
+                startWarmTyping(current + 1);
+                return;
+            }
+
+            // Q15: 小卡片（选A/B才触发）
+            if (current === 14) {
+                if (idx === 0 || idx === 1) {
+                    setTimeout(() => openQ15Card(), 100);
+                }
+                return;
+            }
+
+            // Q18: 锁定消极选项
+            if (current === 17) {
+                if (idx === 2) {
+                    div.innerText = "不许这样想哦~";
+                    div.classList.add("locked");
+                    div.onclick = null;
+                }
+                if (idx === 3) {
+                    div.innerText = "你值得被爱的 ❤️";
+                    div.classList.add("locked");
+                    div.onclick = null;
+                }
+                return;
+            }
+
+            // Q22: 满屏"我爱你"
+            if (current === 21) {
+                if (idx === 0 || idx === 1) {
+                    startLoveTyping();
+                } else {
+                    div.innerText = "不许选这个 ^_^";
+                    div.classList.add("locked");
+                    div.onclick = null;
+                }
+                return;
+            }
+        };
+        optionsEl.appendChild(div);
+    });
+
+    // Q5: 从Q4进入时触发
+    if (current === 4 && fromQ4ToQ5) {
+        startQ5Effect();
+        fromQ4ToQ5 = false;
+    }
+
+    prevBtn.disabled = current === 0;
+    nextBtn.innerText = current === total - 1 ? "提交问卷" : "下一题";
+}
+
+prevBtn.onclick = () => {
+    clearAllEffects();
+    if (current > 0) {
+        current--;
+        renderQuestion();
+    }
+};
+
+nextBtn.onclick = () => {
+    clearAllEffects();
+    if (current === 3) fromQ4ToQ5 = true;
+    if (current < total - 1) {
+        current++;
+        renderQuestion();
+    } else {
+        showFinalModal();
+    }
+};
+
+// ====== 启动 ======
+document.getElementById('noticeBtn').onclick = function() {
+    document.getElementById('noticeModal').remove();
+    playBgm();
+    openStartModal();
+};
+</script>
+</body>
+</html>
